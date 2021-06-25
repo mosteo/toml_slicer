@@ -4,6 +4,10 @@ with AAA.Text_IO;
 
 package body TOML_Slicer is
 
+   ----------------------------
+   -- Remove_Line_From_Array --
+   ----------------------------
+
    procedure Remove_Line_From_Array (File_Name  : String;
                                      Array_Name : String;
                                      Entry_Name : String;
