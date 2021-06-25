@@ -1,6 +1,6 @@
 name = "toml_slicer"
-description = "Shiny new project"
-version = "0.0.0"
+description = "Edit TOML files directly without parsing"
+version = "0.1.0-dev"
 
 authors = ["Alejandro R. Mosteo"]
 maintainers = ["Alejandro R. Mosteo <alejandro@mosteo.com>"]
