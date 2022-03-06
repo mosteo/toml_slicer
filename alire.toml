@@ -1,7 +1,10 @@
 name = "toml_slicer"
 description = "Edit TOML files directly without parsing"
 version = "0.1.0"
+licenses = "MIT"
+tags = ["toml"]
 
 authors = ["Alejandro R. Mosteo"]
 maintainers = ["Alejandro R. Mosteo <alejandro@mosteo.com>"]
 maintainers-logins = ["mosteo"]
+website = "https://github.com/mosteo/toml_slicer"
