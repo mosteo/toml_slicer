@@ -1,6 +1,6 @@
 name = "toml_slicer"
 description = "Edit TOML files directly without parsing"
-version = "0.1.0-dev"
+version = "0.1.0"
 
 authors = ["Alejandro R. Mosteo"]
 maintainers = ["Alejandro R. Mosteo <alejandro@mosteo.com>"]
