@@ -2,7 +2,123 @@ with AAA.Filesystem;
 with AAA.Strings;
 with AAA.Text_IO;
 
+with Ada.Text_IO;
+
 package body TOML_Slicer is
+
+   Debug : constant Boolean := False;
+
+   ---------------
+   -- Debug_Put --
+   ---------------
+
+   procedure Put_Debug (Line : String) is
+   begin
+      if Debug then
+         Ada.Text_IO.Put_Line ("[TOML_Slicer debug] " & Line);
+      end if;
+   end Put_Debug;
+
+   ------------------
+   -- Remove_Array --
+   ------------------
+
+   procedure Remove_Array (File_Name  : String;
+                           Array_Name : String;
+                           Backup     : Boolean;
+                           Backup_Dir : String := ".")
+   is
+
+      ------------
+      -- Remove --
+      ------------
+
+      procedure Remove (Lines : in out AAA.Strings.Vector) is
+         use AAA.Strings;
+
+         Starter_1 : constant String := "[[" & Array_Name & "]]";
+         Starter_2 : constant String := "[[" & Array_Name & ".";
+         Starter_3 : constant String := "[" & Array_Name & ".";
+
+         ------------------
+         -- Out_Of_Array --
+         ------------------
+
+         function Out_Of_Array (Line : String) return Boolean is
+         begin
+            --  Check this is a simple nested table field or empty line
+            if Line'Length = 0 or else Line (Line'First) /= '[' then
+               return False;
+            end if;
+
+            --  Otherwise, check we're not entering a different array
+            if Has_Prefix (Line, Starter_1) or else
+              Has_Prefix (Line, Starter_2) or else
+              Has_Prefix (Line, Starter_3)
+            then
+               --  Still fields/entries of the same array,
+               --  either a subtable or a nested array. See
+               --  https://toml.io/en/v1.0.0#array-of-tables
+               return False;
+            else
+               return True;
+            end if;
+         end Out_Of_Array;
+
+         Armed     : Boolean := False;
+         --  True when we are inside [[array]]
+
+         I : Positive := 1;
+      begin
+         while I <= Lines.Last_Index loop
+            declare
+               Line  : constant String := Replace (Lines (I), " ", "");
+            begin
+               if Armed then
+                  if not Out_Of_Array (Line) then
+                     Put_Debug ("DELETE: " & Line);
+                     Lines.Delete (I);
+                  else
+                     Put_Debug ("DISARM: " & Line);
+                     Armed := False;
+                     I := I + 1;
+                  end if;
+               else -- not armed
+                  if Has_Prefix (Line, Starter_1) or else
+                    Has_Prefix (Line, Starter_2)
+                    --  Starter_3 would be a nested table but not array
+                  then
+                     Put_Debug ("ARMED: " & Line);
+                     Armed := True;
+                     Lines.Delete (I);
+                  else
+                     Put_Debug ("NOT ARM: " & Line);
+                     I := I + 1;
+                  end if;
+               end if;
+            end;
+         end loop;
+      end Remove;
+
+      Replacer  : constant AAA.Filesystem.Replacer :=
+                    AAA.Filesystem.New_Replacement
+                      (File_Name,
+                       Backup     => Backup,
+                       Backup_Dir => Backup_Dir);
+   begin
+      declare
+         File      : constant AAA.Text_IO.File :=
+                       AAA.Text_IO.Load (Replacer.Editable_Name,
+                                         Backup => False);
+         --  Replacer takes care of backup
+      begin
+         Remove (File.Lines.all);
+      end;
+      --  File goes out of scope here and rewrites the contents, so the
+      --  replacer keeps the already modified file.
+
+      Replacer.Replace; -- All went well, keep the changes
+   end Remove_Array;
 
    ----------------------------
    -- Remove_Line_From_Array --
