@@ -207,7 +207,6 @@ package body TOML_Slicer is
                raise Slicing_Error with
                  "Could not find removable entry " & Entry_Name
                  & " in array " & Array_Name & " in file " & File_Name;
-               return;
             end if;
          end Remove_Target;
 
