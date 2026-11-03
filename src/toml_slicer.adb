@@ -2,7 +2,7 @@ with AAA.Filesystem;
 with AAA.Strings;
 with AAA.Text_IO;
 
-with Ada.Text_IO;
+with GNAT.IO;
 
 package body TOML_Slicer is
 
@@ -15,7 +15,8 @@ package body TOML_Slicer is
    procedure Put_Debug (Line : String) is
    begin
       if Debug then
-         Ada.Text_IO.Put_Line ("[TOML_Slicer debug] " & Line);
+         GNAT.IO.Put_Line (GNAT.IO.Standard_Error,
+                           "[TOML_Slicer debug] " & Line);
       end if;
    end Put_Debug;
 
@@ -107,15 +108,16 @@ package body TOML_Slicer is
                        Backup_Dir => Backup_Dir);
    begin
       declare
-         File      : constant AAA.Text_IO.File :=
+         File      : AAA.Text_IO.File :=
                        AAA.Text_IO.Load (Replacer.Editable_Name,
                                          Backup => False);
          --  Replacer takes care of backup
       begin
          Remove (File.Lines.all);
+         File.Save;
+         --  Rewrites the contents now, raising on failure, so the replacer
+         --  keeps the already modified file.
       end;
-      --  File goes out of scope here and rewrites the contents, so the
-      --  replacer keeps the already modified file.
 
       Replacer.Replace; -- All went well, keep the changes
    end Remove_Array;
@@ -298,12 +300,13 @@ package body TOML_Slicer is
    begin
 
       declare
-         File : constant AAA.Text_IO.File :=
+         File : AAA.Text_IO.File :=
                   AAA.Text_IO.Load (Replacer.Editable_Name,
                                     Backup => False);
                                     --  Replacer takes care of backup
       begin
          Remove (File.Lines.all);
+         File.Save; -- Raises on failure, so we never replace with a stale file
       end;
 
       Replacer.Replace; -- All went well, keep the changes
