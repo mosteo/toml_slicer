@@ -34,6 +34,6 @@ jobs:
           cat >> alire.toml <<'EOF'
 
           [[pins]]
-          aaa_texts = { url = "https://github.com/mosteo/aaa", commit = "7799d0401c147aae8d4422eae391b5aa24748a91", subdir = "aaa_texts" }
+          aaa_texts = { url = "https://github.com/mosteo/aaa", commit = "81be216da5e46f3da86c1fa0200854be51af875e", subdir = "aaa_texts" }
           EOF
       - run: alr build
